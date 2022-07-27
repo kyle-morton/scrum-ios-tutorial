@@ -13,9 +13,11 @@ struct DetailVIew: View {
     var body: some View {
         List {
             Section(header: Text("Meeting Info")) {
-                Label("Start meeting", systemImage: "timer")
-                    .font(.headline)
-                    .foregroundColor(.accentColor);
+                NavigationLink(destination: MeetingView()) {
+                    Label("Start meeting", systemImage: "timer")
+                        .font(.headline)
+                        .foregroundColor(.accentColor);
+                }
                 HStack {
                     Label("Length", systemImage: "clock");
                     Spacer();
@@ -38,7 +40,8 @@ struct DetailVIew: View {
                     Label(attendee.name, systemImage: "person");
                 }
             }
-        };
+        }
+        .navigationTitle(scrum.title);
     }
 }
 
