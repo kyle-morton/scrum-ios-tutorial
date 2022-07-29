@@ -20,8 +20,10 @@ struct DetailEditView: View {
                     Slider(value: $data.lengthInMinutes, in: 5...30, step: 1) {
                         Text("Length");
                     }
+                    .accessibilityValue("\(Int(data.lengthInMinutes))");
                     Spacer();
                     Text("\(Int(data.lengthInMinutes)) minutes")
+                        .accessibilityHidden(true);
                 }
                 Section(header: Text("Attendees")) {
                     ForEach(data.attendees) { attendee in
@@ -39,7 +41,8 @@ struct DetailEditView: View {
                                 newAttendeeName = "";
                             }
                         }) {
-                            Image(systemName: "plus.circle.fill");
+                            Image(systemName: "plus.circle.fill")
+                                .accessibilityLabel("Add Attendee");
                         }
                         .disabled(newAttendeeName.isEmpty);
                     }
