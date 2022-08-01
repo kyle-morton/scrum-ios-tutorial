@@ -30,21 +30,24 @@ struct ScrumsView: View {
             .accessibilityLabel("New Scrum");
         }
         .sheet(isPresented: $isPresentingNewScrumView) {
-            DetailEditView(data: $newScrumData)
-                .toolbar {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button("Dismiss") {
-                            isPresentingNewScrumView = false;
+            NavigationView {
+                DetailEditView(data: $newScrumData)
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button("Dismiss") {
+                                isPresentingNewScrumView = false;
+                            }
+                        }
+                        ToolbarItem(placement: .confirmationAction) {
+                            Button("Add") {
+                                let newScrum = DailyScrum(data: newScrumData);
+                                scrums.append(newScrum);
+                                isPresentingNewScrumView = false;
+                                newScrumData = DailyScrum.Data();
+                            }
                         }
                     }
-                    ToolbarItem(placement: .confirmationAction) {
-                        Button("Add") {
-                            let newScrum = DailyScrum(data: newScrumData);
-                            scrums.append(newScrum);
-                            isPresentingNewScrumView = false;
-                        }
-                    }
-                }
+            }
         }
     }
 }
