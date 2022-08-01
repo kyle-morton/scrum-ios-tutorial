@@ -1,0 +1,51 @@
+//
+//  ScrumStore.swift
+//  Scrumdinger
+//
+//  Created by Kyle Morton on 7/31/22.
+//
+
+import Foundation
+import SwiftUI
+
+class ScrumStore : ObservableObject {
+    @Published var scrums: [DailyScrum] = [];
+    
+    private static func fileURL() throws -> URL {
+        try FileManager.default.url(for: .documentDirectory,
+                                    in: .userDomainMask,
+                                    appropriateFor: nil,
+                                    create: false)
+        .appendingPathComponent("scrums.data");
+    };
+    
+    static func load(completion: @escaping (Result<[DailyScrum], Error>)->Void) {
+        
+        /// dispQueue is where you schedule tasks, these are FIFO, background is lowest priority
+        DispatchQueue.global(qos: .background).async {
+            do {
+                let fileURL = try fileURL();
+                
+                guard let file = try? FileHandle(forReadingFrom: fileURL) else {
+                    DispatchQueue.main.async {
+                        completion(.success([]));
+                    }
+                    return;
+                }
+                
+                /// You perform the longer-running tasks of opening the file and decoding its contents on a background queue. When those tasks complete, you switch back to the main queue.
+                
+                let dailyScrums = try JSONDecoder().decode([DailyScrum].self, from: file.availableData);
+                DispatchQueue.main.async {
+                    completion(.success(dailyScrums));
+                }
+            }
+            catch {
+                DispatchQueue.main.async {
+                    completion(.failure(error));
+                }
+            }
+        }
+    };
+    
+}
