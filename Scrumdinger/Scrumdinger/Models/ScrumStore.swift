@@ -19,6 +19,21 @@ class ScrumStore : ObservableObject {
         .appendingPathComponent("scrums.data");
     };
     
+    /// wrapper async function for the legacy DispatchQueue version
+    static func load() async throws -> [DailyScrum] {
+        try await withCheckedThrowingContinuation { continuation in
+            load { result in
+                switch result {
+                case .failure(let error):
+                    continuation.resume(throwing: error);
+                case .success(let scrums):
+                    continuation.resume(returning: scrums);
+                }
+                
+            }
+        }
+    }
+    
     static func load(completion: @escaping (Result<[DailyScrum], Error>)->Void) {
         
         /// dispQueue is where you schedule tasks, these are FIFO, background is lowest priority
@@ -47,6 +62,22 @@ class ScrumStore : ObservableObject {
             }
         }
     };
+    
+    /// discardable result -> disables compiler warnings if client doesn't store FNs return value
+    @discardableResult
+    static func save(scrums: [DailyScrum]) async throws -> Int {
+        try await withCheckedThrowingContinuation { continuation in
+            save(scrums:scrums) { result in
+                switch result {
+                case .failure(let error):
+                    continuation.resume(throwing: error);
+                case .success(let scrums):
+                    continuation.resume(returning: scrums);
+                }
+                
+            }
+        }
+    }
     
     static func save(scrums: [DailyScrum], completion: @escaping (Result<Int, Error>)->Void) {
         DispatchQueue.global(qos: .background).async {
