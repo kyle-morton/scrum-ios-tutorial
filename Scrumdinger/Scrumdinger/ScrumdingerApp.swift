@@ -10,6 +10,8 @@ import SwiftUI
 @main
 struct ScrumdingerApp: App {
     @StateObject private var store = ScrumStore();
+    @State private var errorWrapper: ErrorWrapper?;
+    
     var body: some Scene {
         WindowGroup {
             NavigationView {
@@ -20,15 +22,9 @@ struct ScrumdingerApp: App {
                             try await ScrumStore.save(scrums: store.scrums);
                         }
                         catch {
-                            fatalError("Error saving scrums");
+                            errorWrapper = ErrorWrapper(error: error, guidance: "Try again later.");
                         }
                     }
-                    /// when scene becomes inactive, save scrums to local file
-//                    ScrumStore.save(scrums: store.scrums) { result in
-//                        if case .failure(let error) = result {
-//                            fatalError(error.localizedDescription);
-//                        }
-//                    }
                 }
             }
             .task {
@@ -36,20 +32,15 @@ struct ScrumdingerApp: App {
                     store.scrums = try await ScrumStore.load();
                 }
                 catch {
-                    fatalError("Error loading scrums");
+                    errorWrapper = ErrorWrapper(error: error, guidance: "Scrumdinger will load sample data and continue.");
+
                 }
             }
-//            .onAppear {
-//                /// whenever the initial view loads up, pull in scrums from local file
-//                ScrumStore.load { result in
-//                    switch result {
-//                    case .failure(let error):
-//                        fatalError(error.localizedDescription);
-//                    case .success(let scrums):
-//                        store.scrums = scrums;
-//                    }
-//                }
-//            }
+            .sheet(item: $errorWrapper, onDismiss: {
+                store.scrums = DailyScrum.sampleData;
+            }) { wrapper in
+                ErrorView(errorWrapper: wrapper)
+            };
         }
     }
 }
