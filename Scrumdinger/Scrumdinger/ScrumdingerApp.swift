@@ -12,6 +12,10 @@ struct ScrumdingerApp: App {
     @StateObject private var store = ScrumStore();
     @State private var errorWrapper: ErrorWrapper?;
     
+    enum TestError: Error {
+        case errorRequired
+    }
+    
     var body: some Scene {
         WindowGroup {
             NavigationView {
@@ -29,6 +33,7 @@ struct ScrumdingerApp: App {
             }
             .task {
                 do {
+//                    throw TestError.errorRequired;
                     store.scrums = try await ScrumStore.load();
                 }
                 catch {
